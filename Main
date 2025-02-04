@@ -1,0 +1,216 @@
+import java.util.Scanner;
+import java.util.Arrays;
+
+class Aluno {
+    private String nome;
+    private int matricula;
+    private String curso;
+    private int semestre;
+
+    public Aluno(String nome, int matricula, String curso, int semestre) {
+        this.nome = nome;
+        this.matricula = matricula;
+        this.curso = curso;
+        this.semestre = semestre;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public int getMatricula() {
+        return matricula;
+    }
+
+    public String getCurso() {
+        return curso;
+    }
+
+    public int getSemestre() {
+        return semestre;
+    }
+
+    @Override
+    public String toString() {
+        return "Aluno{" +
+                "nome='" + nome + '\'' +
+                ", matricula=" + matricula +
+                ", curso='" + curso + '\'' +
+                ", semestre=" + semestre +
+                '}';
+    }
+}
+
+class SistemaGerenciamento {
+    private static final int MAX_ALUNOS = 100;
+    private Aluno[] listaAlunos = new Aluno[MAX_ALUNOS];
+    private int tamanhoLista = 0;
+
+    private Aluno[] pilhaOperacoes = new Aluno[MAX_ALUNOS];
+    private int topoPilha = -1;
+
+    private Aluno[] filaEspera = new Aluno[MAX_ALUNOS];
+    private int inicioFila = 0;
+    private int fimFila = 0;
+
+    public void adicionarAluno(Aluno aluno) {
+        if (tamanhoLista >= MAX_ALUNOS) {
+            System.out.println("Lista cheia! Não é possível adicionar mais alunos.");
+            return;
+        }
+        listaAlunos[tamanhoLista++] = aluno;
+        empilharOperacao(aluno);
+        System.out.println("Aluno adicionado: " + aluno);
+    }
+
+    public void removerAluno(int matricula) {
+        for (int i = 0; i < tamanhoLista; i++) {
+            if (listaAlunos[i].getMatricula() == matricula) {
+                empilharOperacao(listaAlunos[i]);
+                listaAlunos[i] = listaAlunos[--tamanhoLista];
+                listaAlunos[tamanhoLista] = null;
+                System.out.println("Aluno removido com sucesso.");
+                return;
+            }
+        }
+        System.out.println("Aluno não encontrado.");
+    }
+
+    public void listarAlunos() {
+        if (tamanhoLista == 0) {
+            System.out.println("Nenhum aluno cadastrado.");
+            return;
+        }
+        for (int i = 0; i < tamanhoLista; i++) {
+            System.out.println(listaAlunos[i]);
+        }
+    }
+
+    public void ordenarAlunosPorNome() {
+        // Bubble Sort
+        for (int i = 0; i < tamanhoLista - 1; i++) {
+            for (int j = 0; j < tamanhoLista - i - 1; j++) {
+                if (listaAlunos[j].getNome().compareTo(listaAlunos[j + 1].getNome()) > 0) {
+                    Aluno temp = listaAlunos[j];
+                    listaAlunos[j] = listaAlunos[j + 1];
+                    listaAlunos[j + 1] = temp;
+                }
+            }
+        }
+        System.out.println("Alunos ordenados por nome (Bubble Sort).");
+    }
+
+    public void enfileirarAluno(Aluno aluno) {
+        if ((fimFila + 1) % MAX_ALUNOS == inicioFila) {
+            System.out.println("Fila cheia! Não é possível adicionar mais alunos na fila.");
+            return;
+        }
+        filaEspera[fimFila] = aluno;
+        fimFila = (fimFila + 1) % MAX_ALUNOS;
+        System.out.println("Aluno adicionado à fila: " + aluno);
+    }
+
+    public void desenfileirarAluno() {
+        if (inicioFila == fimFila) {
+            System.out.println("Fila vazia! Nenhum aluno para matricular.");
+            return;
+        }
+        Aluno aluno = filaEspera[inicioFila];
+        filaEspera[inicioFila] = null;
+        inicioFila = (inicioFila + 1) % MAX_ALUNOS;
+        System.out.println("Aluno matriculado: " + aluno);
+    }
+
+    public void desfazerOperacao() {
+        if (topoPilha < 0) {
+            System.out.println("Nenhuma operação para desfazer.");
+            return;
+        }
+        Aluno aluno = pilhaOperacoes[topoPilha--];
+        System.out.println("Última operação desfeita: " + aluno);
+    }
+
+    private void empilharOperacao(Aluno aluno) {
+        if (topoPilha >= MAX_ALUNOS - 1) {
+            System.out.println("Pilha cheia! Não é possível registrar mais operações.");
+            return;
+        }
+        pilhaOperacoes[++topoPilha] = aluno;
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        SistemaGerenciamento sistema = new SistemaGerenciamento();
+        Scanner scanner = new Scanner(System.in);
+
+        while (true) {
+            System.out.println("\n=== Sistema de Gerenciamento de Alunos ===");
+            System.out.println("1. Adicionar Aluno");
+            System.out.println("2. Remover Aluno");
+            System.out.println("3. Listar Alunos");
+            System.out.println("4. Ordenar Alunos por Nome");
+            System.out.println("5. Enfileirar Aluno");
+            System.out.println("6. Desenfileirar Aluno");
+            System.out.println("7. Desfazer Operação");
+            System.out.println("0. Sair");
+            System.out.print("Escolha uma opção: ");
+
+            int opcao = scanner.nextInt();
+            scanner.nextLine(); // Consumir a quebra de linha
+
+            switch (opcao) {
+                case 1:
+                    System.out.print("Nome: ");
+                    String nome = scanner.nextLine();
+                    System.out.print("Matrícula: ");
+                    int matricula = scanner.nextInt();
+                    scanner.nextLine();
+                    System.out.print("Curso: ");
+                    String curso = scanner.nextLine();
+                    System.out.print("Semestre: ");
+                    int semestre = scanner.nextInt();
+                    scanner.nextLine();
+                    sistema.adicionarAluno(new Aluno(nome, matricula, curso, semestre));
+                    break;
+                case 2:
+                    System.out.print("Matrícula do aluno a remover: ");
+                    int matriculaRemover = scanner.nextInt();
+                    scanner.nextLine();
+                    sistema.removerAluno(matriculaRemover);
+                    break;
+                case 3:
+                    sistema.listarAlunos();
+                    break;
+                case 4:
+                    sistema.ordenarAlunosPorNome();
+                    break;
+                case 5:
+                    System.out.print("Nome: ");
+                    String nomeFila = scanner.nextLine();
+                    System.out.print("Matrícula: ");
+                    int matriculaFila = scanner.nextInt();
+                    scanner.nextLine();
+                    System.out.print("Curso: ");
+                    String cursoFila = scanner.nextLine();
+                    System.out.print("Semestre: ");
+                    int semestreFila = scanner.nextInt();
+                    scanner.nextLine();
+                    sistema.enfileirarAluno(new Aluno(nomeFila, matriculaFila, cursoFila, semestreFila));
+                    break;
+                case 6:
+                    sistema.desenfileirarAluno();
+                    break;
+                case 7:
+                    sistema.desfazerOperacao();
+                    break;
+                case 0:
+                    System.out.println("Encerrando o sistema...");
+                    scanner.close();
+                    return;
+                default:
+                    System.out.println("Opção inválida. Tente novamente.");
+            }
+        }
+    }
+}
